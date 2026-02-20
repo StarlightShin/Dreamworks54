@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo South Park API</title>
+
+  <meta name="description" content="Catálogo Vue consumiendo spapi.dev">
+  <meta name="keywords" content="Vue, API, South Park">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+
+<body class="bg-dark text-white">
+
+<div id="app" class="container py-4">
+
+  <h1 class="mb-4">Catálogo de Personajes</h1>
+
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <input class="form-control"
+             placeholder="Buscar por nombre"
+             v-model="textoBusqueda"
+             @input="aplicarFiltros">
+    </div>
+
+    <div class="col-md-3">
+      <select class="form-select"
+              v-model="sexoSeleccionado"
+              @change="aplicarFiltros">
+        <option value="Todos">Todos</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+    </div>
+
+    <div class="col-md-3">
+      <button class="btn btn-primary" @click="cargarPersonajes">
+        Recargar
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA PROGRESO -->
+  <div class="mb-3">
+    <div class="d-flex justify-content-between">
+      <span>Encontrados: {{ cantidadFiltrados }} / {{ personajes.length }}</span>
+      <span>{{ porcentajeProgreso }}%</span>
+    </div>
+    <div class="progress">
+      <div class="progress-bar bg-success"
+           :style="{width: porcentajeProgreso + '%'}">
+      </div>
+    </div>
+  </div>
+
+  <!-- CATÁLOGO -->
+  <div class="row">
+    <div class="col-md-3 mb-4"
+         v-for="p in personajesFiltrados"
+         :key="p.id">
+
+      <div class="card bg-secondary h-100">
+
+        <div class="card-body text-dark">
+
+          <!-- IMAGEN -->
+          <img :src="imagenPorNombre(p.name)"
+               @error="$event.target.style.display='none'"
+               class="img-fluid rounded mb-2">
+
+          <h5 v-text="p.name"></h5>
+
+          <p>
+            Edad: {{ p.age ?? '—' }} <br>
+            Sexo: {{ p.sex ?? 'Unknown' }}
+          </p>
+
+          <button class="btn btn-dark btn-sm"
+                  @click="abrirModal(p)">
+            Ver más
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div v-if="modalAbierto">
+    <div class="modal fade show d-block">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content text-dark">
+
+          <div class="modal-header">
+            <h5 class="modal-title">{{ personajeSeleccionado.name }}</h5>
+            <button class="btn-close" @click="cerrarModal"></button>
+          </div>
+
+          <div class="modal-body">
+            <p><strong>Edad:</strong> {{ personajeSeleccionado.age ?? '—' }}</p>
+            <p><strong>Sexo:</strong> {{ personajeSeleccionado.sex ?? 'Unknown' }}</p>
+            <p><strong>Ocupación:</strong> {{ personajeSeleccionado.occupation ?? '—' }}</p>
+
+            <div v-html="htmlDetalle"></div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @click="cerrarModal">Cerrar</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop fade show" @click="cerrarModal"></div>
+  </div>
+
+</div>
+
+<script src="./js/funciones.js"></script>
+
+</body>
+</html>
